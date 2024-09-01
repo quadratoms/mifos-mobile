@@ -5,69 +5,72 @@ import android.graphics.Color
 import com.google.gson.Gson
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
-import com.google.zxing.WriterException
 import com.google.zxing.common.BitMatrix
 import org.mifos.mobile.core.model.entity.beneficiary.Beneficiary
-import org.mifos.mobile.core.model.enums.AccountType
+import org.mifos.mobile.core.model.entity.templates.account.AccountType
+import org.mifos.mobile.core.model.enums.AccountType as EnumsAccountType
 
-
-/**
- * Created by dilpreet on 6/7/17.
- */
 object QrCodeGenerator {
+    private const val QR_CODE_SIZE = 200
+
     /**
      * Generate a QRCode which stores `str` in the form of [Bitmap]
      * @param str Data which need to stored in QRCode
-     * @return Returns a [Bitmap] of QRCode
+     * @return Returns a [Bitmap] of QRCode or null if generation fails
      */
     fun encodeAsBitmap(str: String?): Bitmap? {
-        val result: BitMatrix
-        result = try {
-            MultiFormatWriter().encode(str, BarcodeFormat.QR_CODE, 200, 200, null)
-        } catch (iae: IllegalArgumentException) {
-            return null
-        } catch (e: WriterException) {
-            return null
+        if (str.isNullOrEmpty()) return null
+
+        return try {
+            val result = MultiFormatWriter().encode(
+                str,
+                BarcodeFormat.QR_CODE,
+                QR_CODE_SIZE,
+                QR_CODE_SIZE,
+                null,
+            )
+            createBitmapFromBitMatrix(result)
+        } catch (e: Exception) {
+            null
         }
-        val width = result.width
-        val height = result.height
-        val pixels = IntArray(width * height)
-        for (y in 0 until height) {
-            val offset = y * width
-            for (x in 0 until width) {
-                pixels[offset + x] = if (result[x, y]) Color.BLACK else Color.WHITE
-            }
+    }
+
+    private fun createBitmapFromBitMatrix(matrix: BitMatrix): Bitmap {
+        val width = matrix.width
+        val height = matrix.height
+        val pixels = IntArray(width * height) { index ->
+            if (matrix[index % width, index / width]) Color.BLACK else Color.WHITE
         }
-        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-        bitmap.setPixels(pixels, 0, width, 0, 0, width, height)
-        return bitmap
+
+        return Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888).apply {
+            setPixels(pixels, 0, width, 0, 0, width, height)
+        }
     }
 
     /**
      * Provides a string which contains json data for creating a [Beneficiary]
      * @param accountNumber Account Number of client
      * @param officeName Office Name of Client
-     * @param accountType [org.mifos.mobile.ui.enums.AccountType] i.e. SAVINGS or LOAN
+     * @param accountType [EnumsAccountType] i.e. SAVINGS or LOAN
      * @return Returns a string with account details
      */
     fun getAccountDetailsInString(
         accountNumber: String?,
         officeName: String?,
-        accountType: AccountType,
+        accountType: EnumsAccountType,
     ): String {
-        var accountId = -1
-        if (accountType === AccountType.SAVINGS) {
-            accountId = 0
-        } else if (accountType === AccountType.LOAN) {
-            accountId = 1
+        val payload = Beneficiary().apply {
+            this.accountNumber = accountNumber
+            this.accountType = AccountType().apply {
+                id = when (accountType) {
+                    EnumsAccountType.SAVINGS -> 0
+                    EnumsAccountType.LOAN -> 1
+                    EnumsAccountType.SHARE -> -1
+                }
+            }
+            this.officeName = officeName
         }
-        val type = org.mifos.mobile.core.model.entity.templates.account.AccountType()
-        type.id = accountId
-        val payload = Beneficiary()
-        payload.accountNumber = accountNumber
-        payload.accountType = type
-        payload.officeName = officeName
-        val gson = Gson()
-        return gson.toJson(payload)
+
+        return Gson().toJson(payload)
     }
 }

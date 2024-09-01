@@ -2,10 +2,10 @@ package org.mifos.mobile.feature.qr.qr
 
 import android.content.ContentValues.TAG
 import android.content.Context
-import androidx.camera.core.Camera
 import android.util.Log
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
