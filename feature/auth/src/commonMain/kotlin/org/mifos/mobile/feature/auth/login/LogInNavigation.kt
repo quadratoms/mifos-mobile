@@ -14,18 +14,18 @@ package org.mifos.mobile.feature.auth.login
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.mifos.mobile.core.ui.composableWithStayTransitions
 
 @Serializable
+@SerialName("login")
 data object LoginRoute
 
-@Suppress("UnusedParameter")
 fun NavController.navigateToLogin(navOptions: NavOptions? = null) {
     this.navigate(route = LoginRoute, navOptions = navOptions)
 }
 
-@Suppress("UnusedParameter")
 fun NavGraphBuilder.loginDestination(
     navigateToRegisterScreen: () -> Unit,
     navigateToPasscodeScreen: () -> Unit,
