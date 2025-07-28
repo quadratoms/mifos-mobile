@@ -103,7 +103,7 @@ internal fun SavingsAccountCard(
                 Icon(
                     imageVector = MifosIcons.ChevronRight,
                     contentDescription = null,
-                    modifier = Modifier.clickable {}.size(20.dp),
+                    modifier = Modifier.size(20.dp),
                 )
             }
         }
