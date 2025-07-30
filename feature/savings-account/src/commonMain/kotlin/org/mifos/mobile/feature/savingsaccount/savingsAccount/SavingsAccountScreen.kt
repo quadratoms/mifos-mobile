@@ -54,9 +54,10 @@ import org.mifos.mobile.core.designsystem.theme.AppColors
 import org.mifos.mobile.core.designsystem.theme.DesignToken
 import org.mifos.mobile.core.designsystem.theme.MifosMobileTheme
 import org.mifos.mobile.core.designsystem.theme.MifosTypography
+import org.mifos.mobile.core.model.LoanStatus
+import org.mifos.mobile.core.ui.component.MifosAccountCard
 import org.mifos.mobile.core.ui.component.MifosDashboardCard
 import org.mifos.mobile.core.ui.utils.EventsEffect
-import org.mifos.mobile.feature.savingsaccount.components.SavingsAccountCard
 
 @Composable
 fun SavingsAccountScreen(
@@ -212,15 +213,14 @@ internal fun SavingsAccountContent(
                 Spacer(modifier = Modifier.height(DesignToken.spacing.small))
             }
             items(state.savingsAccount.orEmpty()) { account ->
-                // TODO create enum class
                 val color = when (account.status?.value) {
-                    "Active" -> AppColors.customEnable
-                    "submittedAndPendingApproval" -> AppColors.customYellow
-                    "Withdrawn by applicant", "Matured" -> MaterialTheme.colorScheme.error
+                    LoanStatus.ACTIVE.status -> AppColors.customEnable
+                    LoanStatus.SUBMIT_AND_PENDING_APPROVAL.status -> AppColors.customYellow
+                    LoanStatus.WITHDRAWN.status, LoanStatus.MATURED.status -> MaterialTheme.colorScheme.error
                     else -> MaterialTheme.colorScheme.onSurface
                 }
 
-                SavingsAccountCard(
+                MifosAccountCard(
                     accountId = account.id,
                     accountNumber = account.accountNo,
                     accountType = account.productName,
@@ -244,6 +244,7 @@ internal fun SavingsAccountContent(
                             ),
                         )
                     },
+                    icon = MifosIcons.PersonAccounts,
                 )
             }
         }
