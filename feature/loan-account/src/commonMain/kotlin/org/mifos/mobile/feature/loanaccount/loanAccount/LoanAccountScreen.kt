@@ -93,14 +93,14 @@ fun LoanAccountScreen(
         }
     }
 
-    SavingsAccountDialog(
+    LoanAccountDialog(
         dialogState = state.dialogState,
         onAction = remember(viewModel) {
             { viewModel.trySendAction(it) }
         },
     )
 
-    SavingsAccountContent(
+    LoanAccountContent(
         state = state,
         onAction = remember(viewModel) {
             { viewModel.trySendAction(it) }
@@ -110,7 +110,7 @@ fun LoanAccountScreen(
 }
 
 @Composable
-internal fun SavingsAccountDialog(
+internal fun LoanAccountDialog(
     dialogState: LoanAccountsState.DialogState?,
     onAction: (LoanAccountsAction) -> Unit,
 ) {
@@ -130,7 +130,7 @@ internal fun SavingsAccountDialog(
 }
 
 @Composable
-internal fun SavingsAccountContent(
+internal fun LoanAccountContent(
     state: LoanAccountsState,
     onAction: (LoanAccountsAction) -> Unit,
     filtersClicked: () -> Unit,
@@ -253,7 +253,7 @@ internal fun SavingsAccountContent(
 @Composable
 private fun Savings_Account_Preview() {
     MifosMobileTheme {
-        SavingsAccountContent(
+        LoanAccountContent(
             state = LoanAccountsState(
                 dialogState = null,
                 loanAccounts = emptyList(),
