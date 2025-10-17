@@ -24,12 +24,42 @@ import org.mifos.mobile.feature.beneficiary.beneficiaryDetail.navigateToBenefici
 import org.mifos.mobile.feature.beneficiary.beneficiaryList.BeneficiaryListNavRoute
 import org.mifos.mobile.feature.beneficiary.beneficiaryList.beneficiaryListScreen
 
+/**
+ * Data class representing the navigation route for the beneficiary feature.
+ *
+ * @property BeneficiaryNavRoute the navigation route for the beneficiary feature.
+ */
 @Serializable
 data object BeneficiaryNavRoute
 
+/**
+ * Navigate to the beneficiary navigation graph.
+ *
+ * @param navOptions the navigation options to use when navigating to the beneficiary navigation graph.
+ */
 fun NavController.navigateToBeneficiaryNavGraph(navOptions: NavOptions? = null) =
     navigate(BeneficiaryNavRoute, navOptions)
 
+/**
+ * Adds a navigation graph for the beneficiary feature.
+ *
+ * The navigation graph has the following destinations:
+ * - Beneficiary List Screen: The screen that displays the list of all beneficiaries.
+ * - Manual Beneficiary Add Screen: The screen that allows the user to manually add a beneficiary.
+ * - Beneficiary Application Confirmation Screen: The screen that confirms the addition of a beneficiary.
+ * - Beneficiary Detail Screen: The screen that displays the details of a beneficiary.
+ *
+ * The navigation graph is structured as follows:
+ * - The Beneficiary List Screen is the starting point of the graph.
+ * - The Manual Beneficiary Add Screen is reachable from the Beneficiary List Screen.
+ * - The Beneficiary Application Confirmation Screen is reachable from the Manual Beneficiary Add Screen.
+ * - The Beneficiary Detail Screen is reachable from the Beneficiary List Screen and the Manual Beneficiary Add Screen.
+ *
+ * @param navController The navigation controller to use for navigation.
+ * @param navigateToQR A function to navigate to the QR code screen.
+ * @param navigateToStatusScreen A function to navigate to the status screen.
+ * @param navigateToAuthenticateScreen A function to navigate to the authentication screen.
+ */
 fun NavGraphBuilder.beneficiaryNavGraph(
     navController: NavController,
     navigateToQR: () -> Unit,

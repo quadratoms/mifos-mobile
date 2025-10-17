@@ -379,6 +379,31 @@ internal class BeneficiaryApplicationViewModel(
     }
 }
 
+/**
+ * Data class to represent the state of the beneficiary application screen.
+ *
+ * @param topBarTitle the title to display in the top bar.
+ * @param beneficiaryId the ID of the beneficiary.
+ * @param networkUnavailable a flag to indicate if the network is unavailable.
+ * @param template the beneficiary template.
+ * @param beneficiary the beneficiary.
+ * @param beneficiaryState the state of the beneficiary.
+ * @param dialogState the state of the dialog.
+ * @param accountTypeError the error message for the account type.
+ * @param accountNumberError the error message for the account number.
+ * @param officeNameError the error message for the office name.
+ * @param transferLimitError the error message for the transfer limit.
+ * @param beneficiaryNameError the error message for the beneficiary name.
+ * @param accountType the account type of the beneficiary.
+ * @param accountNumber the account number of the beneficiary.
+ * @param officeName the office name of the beneficiary.
+ * @param transferLimit the transfer limit of the beneficiary.
+ * @param beneficiaryName the beneficiary name.
+ * @param networkStatus the network status.
+ * @param uiState the UI state of the screen.
+ * @param shoeOverlay the overlay to display.
+ */
+
 data class BeneficiaryApplicationState(
     val topBarTitle: StringResource = Res.string.add_beneficiary,
     val beneficiaryId: Long = -1L,
@@ -414,8 +439,16 @@ data class BeneficiaryApplicationState(
         beneficiaryName.isNotEmpty()
 }
 
+/**
+ * Data class to represent the events of the beneficiary application screen.
+ *
+ * @param Navigate navigate to the next screen.
+ * @param SubmitBeneficiary submit the beneficiary application.
+ * @param NavigateToQR navigate to the QR screen.
+ */
 sealed interface BeneficiaryApplicationEvent {
     data object Navigate : BeneficiaryApplicationEvent
+
     data class SubmitBeneficiary(
         val beneficiaryId: Long,
         val beneficiaryState: String,
@@ -425,20 +458,39 @@ sealed interface BeneficiaryApplicationEvent {
         val accountNumber: String,
         val transferLimit: Int,
     ) : BeneficiaryApplicationEvent
+
     data object NavigateToQR : BeneficiaryApplicationEvent
 }
 
+/***
+ * Data class to represent the actions of the beneficiary application screen.
+ *
+ * @param LoadBeneficiaryTemplate load the beneficiary template.
+ * @param SubmitBeneficiary submit the beneficiary application.
+ * @param OnNavigate navigate to the next screen.
+ * @param OnRetry retry the operation.
+ * @param NavigateToQR navigate to the QR screen.
+ */
+
 sealed interface BeneficiaryApplicationAction {
+
     data object LoadBeneficiaryTemplate : BeneficiaryApplicationAction
     data object SubmitBeneficiary : BeneficiaryApplicationAction
+
     data object OnNavigate : BeneficiaryApplicationAction
+
     data object OnRetry : BeneficiaryApplicationAction
+
     data object NavigateToQR : BeneficiaryApplicationAction
 
     data class OnAccountTypeChanged(val accountType: Int) : BeneficiaryApplicationAction
+
     data class OnAccountNumberChanged(val accountNumber: String) : BeneficiaryApplicationAction
+
     data class OnOfficeNameChanged(val officeName: String) : BeneficiaryApplicationAction
+
     data class OnTransferLimitChanged(val transferLimit: String) : BeneficiaryApplicationAction
+
     data class OnBeneficiaryNameChanged(val beneficiaryName: String) : BeneficiaryApplicationAction
 
     data class ReceiveNetworkStatus(val isOnline: Boolean) : BeneficiaryApplicationAction
