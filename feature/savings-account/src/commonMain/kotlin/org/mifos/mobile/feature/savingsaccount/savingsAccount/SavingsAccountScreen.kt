@@ -40,6 +40,7 @@ import mifos_mobile.feature.savings_account.generated.resources.feature_account_
 import mifos_mobile.feature.savings_account.generated.resources.feature_savings_account
 import mifos_mobile.feature.savings_account.generated.resources.feature_savings_account_dashboard
 import mifos_mobile.feature.savings_account.generated.resources.feature_savings_account_items
+import mifos_mobile.feature.savings_account.generated.resources.feature_savings_filter_pending_account
 import mifos_mobile.feature.savings_account.generated.resources.feature_savings_no_accounts_found
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -52,7 +53,7 @@ import org.mifos.mobile.core.designsystem.theme.AppColors
 import org.mifos.mobile.core.designsystem.theme.DesignToken
 import org.mifos.mobile.core.designsystem.theme.MifosMobileTheme
 import org.mifos.mobile.core.designsystem.theme.MifosTypography
-import org.mifos.mobile.core.model.LoanStatus
+import org.mifos.mobile.core.model.SavingStatus
 import org.mifos.mobile.core.ui.component.EmptyDataView
 import org.mifos.mobile.core.ui.component.MifosAccountCard
 import org.mifos.mobile.core.ui.component.MifosDashboardCard
@@ -60,7 +61,6 @@ import org.mifos.mobile.core.ui.component.MifosErrorComponent
 import org.mifos.mobile.core.ui.component.MifosProgressIndicator
 import org.mifos.mobile.core.ui.utils.EventsEffect
 import org.mifos.mobile.core.ui.utils.ScreenUiState
-import kotlin.collections.orEmpty
 
 @Composable
 fun SavingsAccountScreen(
@@ -91,29 +91,21 @@ fun SavingsAccountScreen(
     EventsEffect(viewModel.eventFlow) { event ->
         when (event) {
             is SavingsAccountsEvent.NavigateBack -> navigateBack.invoke()
-
             is SavingsAccountsEvent.AccountClicked -> {
                 onAccountClicked(Constants.SAVINGS_ACCOUNT, event.accountId)
             }
-
-            is SavingsAccountsEvent.LoadingCompleted -> {
-                onLoadingCompleted.invoke()
-            }
+            is SavingsAccountsEvent.LoadingCompleted -> onLoadingCompleted.invoke()
         }
     }
 
     SavingsAccountDialog(
         dialogState = state.dialogState,
-        onAction = remember(viewModel) {
-            { viewModel.trySendAction(it) }
-        },
+        onAction = remember(viewModel) { { viewModel.trySendAction(it) } },
     )
 
     SavingsAccountContent(
         state = state,
-        onAction = remember(viewModel) {
-            { viewModel.trySendAction(it) }
-        },
+        onAction = remember(viewModel) { { viewModel.trySendAction(it) } },
         filtersClicked = filtersClicked,
     )
 }
@@ -131,7 +123,6 @@ internal fun SavingsAccountDialog(
                 isRetryEnabled = true,
             )
         }
-
         null -> Unit
     }
 }
@@ -210,19 +201,7 @@ internal fun SavingsAccountContent(
                         )
                     }
 
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(DesignToken.spacing.largeIncreased),
-                    ) {
-                        // TODO : un-implemented feature,
-                        //  commenting because user won't feels its good ,uncomment and implement it
-                        //                    Icon(
-                        //                        modifier = Modifier
-                        //                            .clickable {}
-                        //                            .size(20.dp),
-                        //                        imageVector = MifosIcons.SearchNew,
-                        //                        contentDescription =
-                        //                        stringResource(Res.string.content_description_search),
-                        //                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(DesignToken.spacing.largeIncreased)) {
                         Icon(
                             modifier = Modifier
                                 .clickable { filtersClicked() }
@@ -254,38 +233,41 @@ internal fun SavingsAccountContent(
                         )
                     }
                 } else {
+                    val accounts = state.savingsAccount.orEmpty()
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
                             .weight(1f),
                     ) {
-                        item {
-                            Spacer(modifier = Modifier.height(DesignToken.spacing.small))
-                        }
-                        items(state.savingsAccount.orEmpty()) { account ->
+                        item { Spacer(modifier = Modifier.height(DesignToken.spacing.small)) }
+
+                        items(accounts) { account ->
                             val color = when (account.status?.value) {
-                                LoanStatus.ACTIVE.status -> AppColors.customEnable
-                                LoanStatus.SUBMIT_AND_PENDING_APPROVAL.status -> AppColors.customYellow
-                                LoanStatus.WITHDRAWN.status, LoanStatus.MATURED.status ->
-                                    MaterialTheme.colorScheme.error
+                                SavingStatus.ACTIVE.status -> AppColors.customEnable
+                                SavingStatus.SUBMIT_AND_PENDING_APPROVAL.status -> AppColors.customYellow
+                                SavingStatus.INACTIVE.status -> MaterialTheme.colorScheme.error
                                 else -> MaterialTheme.colorScheme.onSurface
+                            }
+
+                            val accountStatus = if (account.status?.active == true) {
+                                CurrencyFormatter.format(
+                                    account.accountBalance,
+                                    account.currency?.code,
+                                    account.currency?.decimalPlaces,
+                                )
+                            } else {
+                                if (account.status?.value == SavingStatus.SUBMIT_AND_PENDING_APPROVAL.status) {
+                                    stringResource(Res.string.feature_savings_filter_pending_account)
+                                } else {
+                                    account.status?.value ?: ""
+                                }
                             }
 
                             MifosAccountCard(
                                 accountId = account.id,
                                 accountNumber = account.accountNo,
                                 accountType = account.productName,
-                                accountStatus = (
-                                    if (account.status?.active == true) {
-                                        CurrencyFormatter.format(
-                                            account.accountBalance,
-                                            account.currency?.code,
-                                            account.currency?.decimalPlaces,
-                                        )
-                                    } else {
-                                        account.status?.value ?: ""
-                                    }
-                                    ),
+                                accountStatus = accountStatus,
                                 accountStatusColor = color,
                                 onAccountClick = {
                                     onAction(
