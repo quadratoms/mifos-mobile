@@ -62,3 +62,4 @@ cmp-ios/iosApp.xcworkspace/xcuserdata/
 *.xcuserstate
 *.xcuserdatad/
 .hotswan/
+.gitignore
